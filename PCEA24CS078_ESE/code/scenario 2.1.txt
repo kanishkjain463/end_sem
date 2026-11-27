@@ -1,0 +1,81 @@
+Scenario 2.1 – Library Members
+
+use library
+
+Step 1: Create database and insert four members
+db.members.insertMany([
+  {
+    name: "Ravi",
+    address: { city: "Chennai", pin: "600001" },
+    borrowed: ["Python Basics", "MongoDB Guide"],
+    fee: 0
+  },
+  {
+    name: "Sita",
+    address: { city: "Mumbai", pin: "400001" },
+    borrowed: ["MongoDB Guide"],
+    fee: 50
+  },
+  {
+    name: "Kumar",
+    address: { city: "Chennai", pin: "600028" },
+    borrowed: [],
+    fee: 0
+  },
+  {
+    name: "Lakshmi",
+    address: { city: "Delhi", pin: "110001" },
+    borrowed: ["Python Basics"],
+    fee: 120
+  }
+])
+
+show dbs
+show collections
+
+
+Step 2: Find members who live in Chennai
+
+db.members.find(
+  { "address.city": "Chennai" },
+  { _id: 0, name: 1, address: 1 }
+)
+
+
+Step 3: Find members who borrowed MongoDB Guide
+db.members.find(
+  { borrowed: "MongoDB Guide" },
+  { _id: 0, name: 1, borrowed: 1 }
+)
+
+
+Step 4: Find members who borrowed both books using $all
+
+db.members.find(
+  { borrowed: { $all: ["Python Basics", "MongoDB Guide"] } },
+  { _id: 0, name: 1 }
+)
+
+
+Step 5: Find members who have borrowed no books using $size
+
+db.members.find(
+  { borrowed: { $size: 0 } },
+  { _id: 0, name: 1 }
+)
+
+
+Step 6: Change Sita's city to Chennai using $set
+
+db.members.updateOne(
+  { name: "Sita" },
+  { $set: { "address.city": "Chennai" } }
+)
+
+
+Step 7: Count members owing a fee and drop collection
+
+db.members.countDocuments({ fee: { $gt: 0 } })
+
+db.members.drop()
+

@@ -1,0 +1,128 @@
+Scenario 2.2 – Sales Report
+
+
+Step 1: Insert six orders
+
+use sales
+
+db.orders.insertMany([
+  {
+    orderId: 1,
+    customer: "Arun",
+    product: "Laptop",
+    category: "Electronics",
+    qty: 1,
+    price: 55000
+  },
+  {
+    orderId: 2,
+    customer: "Divya",
+    product: "Mouse",
+    category: "Electronics",
+    qty: 2,
+    price: 500
+  },
+  {
+    orderId: 3,
+    customer: "Arun",
+    product: "Pen",
+    category: "Stationery",
+    qty: 10,
+    price: 40
+  },
+  {
+    orderId: 4,
+    customer: "Meena",
+    product: "Notebook",
+    category: "Stationery",
+    qty: 20,
+    price: 10
+  },
+  {
+    orderId: 5,
+    customer: "Divya",
+    product: "Headphones",
+    category: "Electronics",
+    qty: 1,
+    price: 1500
+  },
+  {
+    orderId: 6,
+    customer: "Karthik",
+    product: "Chair",
+    category: "Furniture",
+    qty: 2,
+    price: 3500
+  }
+])
+
+
+Step 2: Display only Electronics orders using $match and $project
+
+db.orders.aggregate([
+  { $match: { category: "Electronics" } },
+  {
+    $project: {
+      _id: 0,
+      orderId: 1,
+      product: 1
+    }
+  }
+])
+
+Step 3: Calculate line total using $multiply
+
+db.orders.aggregate([
+  {
+    $project: {
+      _id: 0,
+      orderId: 1,
+      customer: 1,
+      lineTotal: { $multiply: ["$qty", "$price"] }
+    }
+  }
+])
+
+Step 4: Find total quantity sold in each category using $group and $sum
+
+db.orders.aggregate([
+  {
+    $group: {
+      _id: "$category",
+      totalQty: { $sum: "$qty" }
+    }
+  }
+])
+
+
+Step 5: Calculate revenue and average price using $sum, $avg and $sort
+
+db.orders.aggregate([
+  {
+    $group: {
+      _id: "$category",
+      revenue: {
+        $sum: { $multiply: ["$qty", "$price"] }
+      },
+      avgPrice: { $avg: "$price" }
+    }
+  },
+  { $sort: { revenue: -1 } }
+])
+
+Step 6: Find top two customers by total spending using $group, $sort and $limit
+
+db.orders.aggregate([
+  {
+    $group: {
+      _id: "$customer",
+      spent: {
+        $sum: { $multiply: ["$qty", "$price"] }
+      }
+    }
+  },
+  { $sort: { spent: -1 } },
+  { $limit: 2 }
+])
+
+
